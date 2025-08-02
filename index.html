@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CerviFix® - Atlas Interactivo de Fijación Cervical</title>
+    
+    <link rel="icon" type="image/png" href="icon.png" sizes="32x32">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CerviFix">
+    <meta name="theme-color" content="#ffffff">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .screen {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden-screen {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            position: absolute;
+        }
+        .visible-screen {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .card-hover-effect {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .btn-animated {
+            transition: all 0.3s ease;
+        }
+        .btn-animated:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        /* Estilos para el modo oscuro */
+        .dark .bg-gray-100 { background-color: #111827; }
+        .dark .bg-white { background-color: #1f2937; }
+        .dark .text-gray-800 { color: #f9fafb; }
+        .dark .text-gray-600 { color: #d1d5db; }
+        .dark .text-gray-500 { color: #9ca3af; }
+        .dark .border-gray-200 { border-color: #374151; }
+        .dark .ring-gray-200 { ring-color: #374151; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3); }
+        .dark #theme-icon {
+            transform: rotate(180deg);
+        }
+        #theme-icon {
+            transition: transform 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased">
+
+    <div id="app-container" class="relative min-h-screen w-full overflow-x-hidden">
+
+        <div id="splash-screen" class="screen visible-screen absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+            <div class="animate-pulse mb-6">
+                <svg class="w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 4.5l-7.5 7.5 7.5 7.5"></path></svg>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-bold text-blue-600">CerviFix®</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-2xl">Interactive Atlas of Cervical Fixation</p>
+            <p class="mt-2 text-sm text-gray-500">By Dr. Jorge Tabilo & Dr. Andrei Joaquim</p>
+            <p class="mt-1 text-xs text-gray-500 italic">Basado en papers de revisión de técnicas quirúrgicas.</p>
+            <button id="start-btn" class="mt-12 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-full text-xl btn-animated shadow-lg">
+                [ Start ]
+            </button>
+        </div>
+
+        <div id="technique-selector-screen" class="screen hidden-screen absolute inset-0 p-4 md:p-8">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2">Technique Selector</h2>
+                <p class="text-center text-gray-600 mb-8 md:mb-12">Select a technique to explore the surgical details.</p>
+                <div id="technique-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                </div>
+                
+                <div class="mt-16">
+                    <h3 class="text-3xl md:text-4xl font-bold text-center mb-8">Modelo 3D - Columna Cervical Normal</h3>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-2 md:p-4">
+                        <iframe
+                            title="Cervical Vertebrae 3D Model"
+                            frameBorder="0"
+                            allowFullScreen
+                            mozallowfullscreen="true"
+                            webkitallowfullscreen="true"
+                            allow="autoplay; fullscreen; xr-spatial-tracking"
+                            xr-spatial-tracking="true"
+                            execution-while-out-of-viewport="true"
+                            execution-while-not-rendered="true"
+                            web-share
+                            width="100%"
+                            height="480"
+                            src="https://sketchfab.com/models/77bcfb7bca8e427cbd2af866d55ec202/embed"
+                        ></iframe>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="technique-detail-screen" class="screen hidden-screen absolute inset-0 p-4 md:p-8">
+            <div class="max-w-5xl mx-auto">
+                <button id="back-to-techniques-btn" class="flex items-center text-blue-500 hover:text-blue-700 mb-6 font-semibold">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Techniques
+                </button>
+                <div id="technique-detail-content">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-4 right-4 flex items-center space-x-3">
+        <button id="theme-toggle" class="bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 focus:outline-none">
+            <svg id="theme-icon" class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+        </button>
+        <div class="relative">
+            <select id="lang-switcher" class="bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 text-gray-600 dark:text-gray-300 appearance-none focus:outline-none">
+                <option value="en">EN</option>
+                <option value="es" disabled>ES</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="image-zoom-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden">
+        <img id="zoomed-image" src="" alt="Zoomed surgical image" class="max-w-full max-h-full rounded-lg">
+        <button id="close-zoom-btn" class="absolute top-4 right-4 text-white text-4xl font-bold">&times;</button>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const db = {
+            techniques: [
+                {
+                    id: 'c1-lateral-mass',
+                    name: 'C1 Lateral Mass Screws',
+                    imageUrl: 'https://jorgetabilo.github.io/Cervical/C11.png',
+                    indication: 'An excellent technique for achieving immobilization and posterior fusion of the C1 segment, especially in cases of trauma, tumors, or degenerative diseases.',
+                    details: {
+                        title: 'C1 Lateral Mass Screw Fixation',
+                        mainImage: 'https://jorgetabilo.github.io/Cervical/C11.png',
+                        sections: [
+                            { 
+                                title: '✅ General & Anatomical Considerations',
+                                content: `The use of lateral mass screws in C1 is one of the best techniques for achieving stabilization of the craniocervical region. The atlas (C1) is a unique ring-shaped vertebra, formed by anterior and posterior arches connected by two lateral masses. It lacks a vertebral body and spinous process. <br><br> Due to significant anatomical variability in the shape and size of the C1 lateral mass, preoperative CT scans are mandatory to plan the optimal screw trajectory and depth. This planning is crucial for successful surgical outcomes.`
+                            },
+                            {
+                                title: '🔬 Surgical Technique',
+                                content: `
+                                    <div class="space-y-6">
+                                        <div>
+                                            <h4 class="font-semibold text-lg">Positioning & Exposure</h4>
+                                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                                <li>The patient is placed in a prone position. An open-mouth view is used for intraoperative fluoroscopy to check screw placement.</li>
+                                                <li>A midline incision is made from the inion to C3. After lateral muscle reflection, a subperiosteal dissection exposes the posterior arch of C1.</li>
+                                                <li>Exposure of the C1 lateral masses can be challenging due to the dense vertebral venous plexus. Meticulous bipolar cauterization is recommended to control bleeding.</li>
+                                            </ul>
+                                        </div>
+                                        <div class="flex flex-col md:flex-row gap-4">
+                                            <div class="w-full md:w-2/5 flex flex-col gap-4">
+                                                 <img src="https://jorgetabilo.github.io/Cervical/C12.png" alt="Surgical exposure of C1" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                                 <img src="https://jorgetabilo.github.io/Cervical/C13.png" alt="Intraoperative view of screw placement" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-semibold text-lg">Screw Insertion</h4>
+                                                <ul class="list-disc list-inside mt-2 space-y-2">
+                                                    <li>After removing the posterior atlantoaxial ligament, the C2 nerve root is identified and mobilized inferiorly to expose the screw entry point on the posterior aspect of the C1 lateral mass.</li>
+                                                    <li>The entry point is typically in the midpoint of the lateral mass, at the junction of the lateral mass and the inferior aspect of the C1 posterior arch.</li>
+                                                    <li>
+                                                        Under fluoroscopic guidance, a hole is drilled with approximately <strong>15° of medial angulation</strong>.
+                                                        <div class="flex gap-4 mt-2">
+                                                          <img src="https://jorgetabilo.github.io/Cervical/C15.png" alt="Screw angulation detail 1" class="w-1/2 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                          <img src="https://jorgetabilo.github.io/Cervical/C16.png" alt="Screw angulation detail 2" class="w-1/2 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                        </div>
+                                                    </li>
+                                                    <li>After tapping the hole, a 3.5-4 mm screw is inserted, aiming for bicortical fixation on the anterior cortex of the lateral mass for maximum stability.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>`
+                            },
+                            { 
+                                title: '⚠️ Anatomical Risks & Complications',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <div class="w-full md:w-1/3">
+                                             <img src="https://jorgetabilo.github.io/Cervical/C14.png" alt="Anatomical relationships of C1" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                        </div>
+                                        <ul class="list-disc list-inside flex-1 space-y-2">
+                                            <li><strong>Vertebral Artery:</strong> This is a major risk. The artery courses behind the C1 lateral mass in a groove on the posterior arch, surrounded by a rich venous plexus. Careful subperiosteal dissection minimizes risk.</li>
+                                            <li><strong>C2 Nerve Root:</strong> The C2 nerve root can be large and may cover the screw entry point, requiring careful dissection and inferior mobilization.</li>
+                                            <li><strong>Internal Carotid Artery:</strong> A screw that is too long or has an improper trajectory can violate the anterior aspect of the lateral mass and injure the internal carotid artery. Appropriate medial angulation decreases this risk.</li>
+                                            <li><strong>Oropharyngeal Perforation:</strong> Excessive medial angulation (more than 25°) increases the risk of perforating the oropharyngeal wall.</li>
+                                        </ul>
+                                    </div>`
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'c2-pedicle-pars',
+                    name: 'C2 Pedicle & Pars Screws',
+                    imageUrl: 'https://jorgetabilo.github.io/Cervical/fig%202A.png',
+                    indication: 'Provide strong fixation of the C2 vertebra, with the pedicle screw offering the highest biomechanical resistance.',
+                    hasVariants: true,
+                    details: {
+                        title: 'C2 Pedicle & Pars Interarticularis Screws',
+                        mainImage: 'https://jorgetabilo.github.io/Cervical/fig%202A.png',
+                        sections: [
+                            { 
+                                title: '✅ General Considerations',
+                                content: 'Fixation of the axis is necessary for atlantoaxial instability from various causes. C2 Pedicle and Pars screws are fundamental modern techniques that provide higher fusion rates and immediate stability compared to older wiring techniques.'
+                            },
+                            { 
+                                title: '📊 Comparison of Techniques',
+                                content: `
+                                    <div class="space-y-8">
+                                        <div>
+                                            <h4 class="font-bold text-lg">C2 Pedicle Screw</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <div class="w-full md:w-1/3 flex flex-col gap-4">
+                                                    <img src="https://jorgetabilo.github.io/Cervical/fig%202A.png" alt="C2 Pedicle Screw - Anatomic" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                                    <img src="https://jorgetabilo.github.io/Cervical/fig%203A.png" alt="C2 Pedicle Screw - CT" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                                </div>
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> In line with the cranial edge of the C2 lamina and just lateral to the midpoint of the C2 pars. A more caudal starting point increases the risk of vertebral artery injury.</li>
+                                                    <li><strong>Trajectory:</strong> Oblique, passing through the pedicle toward the C2 vertebral body.</li>
+                                                    <li><strong>Advantages:</strong> Provides the strongest fixation, with the highest insertional torque and pull-out strength.</li>
+                                                    <li><strong>Risks:</strong> Potential for vertebral artery injury with a lateral violation or spinal canal penetration with a medial violation. Preoperative CT assessment of pedicle width is mandatory.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">C2 Pars Interarticularis Screw</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <div class="w-full md:w-1/3 flex flex-col gap-4">
+                                                    <img src="https://jorgetabilo.github.io/Cervical/fig%202B.png" alt="C2 Pars Screw - Anatomic" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                                    <img src="https://jorgetabilo.github.io/Cervical/fig%203B.png" alt="C2 Pars Screw - CT" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                                </div>
+                                                <ul class="list-disc list-inside flex-1">
+                                                     <li><strong>Entry Point:</strong> ~3 to 5 mm above the C2-3 junction, as medial as possible without violating the spinal canal.</li>
+                                                     <li><strong>Trajectory:</strong> Parallel to the pars interarticularis, often requiring significant craniocaudal inclination.</li>
+                                                     <li><strong>Advantages:</strong> A safer alternative in patients with small pedicles.</li>
+                                                     <li><strong>Risks:</strong> Shorter screw length provides less resistance compared to a pedicle screw. The more vertical the trajectory, the greater the risk to the vertebral artery.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>`
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'c1-c2-transarticular',
+                    name: 'C1-C2 Transarticular Screws',
+                    imageUrl: 'https://jorgetabilo.github.io/Cervical/fig%202C.png',
+                    indication: 'A classic and highly rigid method for achieving C1-C2 fusion, but with strict anatomical requirements.',
+                    details: {
+                        title: 'C1-C2 Transarticular Screws',
+                        mainImage: 'https://jorgetabilo.github.io/Cervical/fig%202C.png',
+                        sections: [
+                            {
+                                title: '🔬 Surgical Technique',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <div class="w-full md:w-1/3 flex flex-col gap-4">
+                                            <img src="https://jorgetabilo.github.io/Cervical/fig%202C.png" alt="Transarticular Screw - Anatomic" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                            <img src="https://jorgetabilo.github.io/Cervical/fig%203C.png" alt="Transarticular Screw - CT" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                        </div>
+                                        <ul class="list-disc list-inside flex-1">
+                                            <li><strong>Entry Point:</strong> Identical to the C2 pars screw (~3-5 mm above the C2-3 junction).</li>
+                                            <li><strong>Trajectory:</strong> Crosses the C2 superior facet joint and aims for the center of the C1 lateral mass. On lateral view, the trajectory is aimed towards the anterior arch of C1.</li>
+                                            <li><strong>Advantages:</strong> Provides excellent, rigid atlantoaxial stability.</li>
+                                        </ul>
+                                    </div>`
+                            },
+                            {
+                                title: '⚠️ Contraindications & Risks',
+                                content: `
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Anatomical Reduction:</strong> Total reduction of the C1-C2 joint is necessary for safe screw placement.</li>
+                                        <li><strong>Vertebral Artery:</strong> A medially located vertebral artery is a formal contraindication. Preoperative CT assessment is mandatory.</li>
+                                        <li><strong>Trajectory Risks:</strong>
+                                            <ul>
+                                                <li>- Too medial: Spinal cord injury.</li>
+                                                <li>- Too lateral: Vertebral artery injury.</li>
+                                                <li>- Too cranial: Violation of the condyle-C1 joint.</li>
+                                                <li>- Too inferior: Inadequate fixation in the C1 lateral mass.</li>
+                                            </ul>
+                                        </li>
+                                    </ul>`
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'c2-intralaminar',
+                    name: 'C2 Intralaminar Screws (Wright)',
+                    imageUrl: 'https://jorgetabilo.github.io/Cervical/fig%202D.png',
+                    indication: 'Safe and effective alternative for C2 fixation, avoiding risk to the vertebral artery. Ideal for patients with anatomical anomalies.',
+                    details: {
+                        title: 'C2 Intralaminar Screws (Wright\'s Technique)',
+                        mainImage: 'https://jorgetabilo.github.io/Cervical/fig%202D.png',
+                        sections: [
+                            {
+                                title: '✅ Clinical Indication & Pearls',
+                                content: 'This technique, first reported by Wright in 2004, is an alternative for the ~20% of patients with anatomy that precludes safe transarticular or pedicle screw placement due to vertebral artery risk. It does not pose a risk to the vertebral artery and is generally performed free-hand. It cannot be used if a C2 laminectomy is required.'
+                            },
+                            {
+                                title: '🔬 Surgical Technique',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <div class="w-full md:w-1/3 flex flex-col gap-4">
+                                            <img src="https://jorgetabilo.github.io/Cervical/fig%202D.png" alt="Laminar Screw - Anatomic" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                            <img src="https://jorgetabilo.github.io/Cervical/fig%203D.png" alt="Laminar Screw - CT" class="w-full rounded-lg object-cover cursor-pointer zoomable-image">
+                                        </div>
+                                        <ul class="list-disc list-inside flex-1">
+                                            <li><strong>Entry Points:</strong> The junction of the spinous process and lamina. One hole is made in the upper portion of the junction on one side, and the other hole is made in the inferior portion on the contralateral side to avoid screw collision.</li>
+                                            <li><strong>Trajectory:</strong> A hand drill is aligned with the long axis of the contralateral lamina. Dorsal cortex perforation is acceptable and can provide stronger bicortical purchase in osteoporotic bone.</li>
+                                            <li><strong>Advantages:</strong> Safe technique with no risk to the vertebral artery, useful in patients with anomalous anatomy.</li>
+                                            <li><strong>Disadvantages:</strong> Due to the oblique orientation, screw head extension connectors may be needed to reach the rods.</li>
+                                        </ul>
+                                    </div>`
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'lateral-mass',
+                    name: 'Lateral Mass Screws (C3-C6)',
+                    imageUrl: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/3_LateralMass_Magerl.jpeg',
+                    indication: 'The most common fixation method for the subaxial spine, with multiple described techniques and trajectories.',
+                    hasVariants: true,
+                    details: {
+                        title: 'Lateral Mass Screws (C3-C6)',
+                        mainImage: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/3_LateralMass_Magerl.jpeg',
+                        sections: [
+                            { 
+                                title: '✅ Clinical Indication',
+                                content: 'Widely used for posterior stabilization from C3 to C6 in cases of trauma, degenerative conditions, infection, or tumors. Angling screws laterally reduces risk of vertebral artery injury, while angling cranially reduces facet joint violation.'
+                            },
+                            { 
+                                title: '⚠️ Complications & Risks',
+                                content: `
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Nerve Root Injury:</strong> An excessively long or cranially-aimed screw can impinge the exiting nerve root. The Magerl technique shows a higher risk for nerve root injury compared to Roy-Camille.</li>
+                                        <li><strong>Vertebral Artery Injury:</strong> A rare but severe complication, minimized by ensuring sufficient lateral angulation.</li>
+                                        <li><strong>Facet Joint Violation:</strong> More common with perpendicular trajectories. The Roy-Camille technique has a higher rate of facet violation (22.5%) compared to Magerl (2.4%).</li>
+                                    </ul>
+                                `
+                            },
+                            { 
+                                title: '📊 Comparison of Variants',
+                                content: `
+                                    <div class="space-y-8">
+                                        <div>
+                                            <h4 class="font-bold text-lg">Roy-Camille Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/1_LateralMass_RoyCamille.jpeg" alt="Roy-Camille Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> Midpoint of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> ~10° from the sagittal plane.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 90° to the lateral mass surface (perpendicular).</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Nazarian and Louis Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/2_LateralMass_NazarianLouis.jpeg" alt="Nazarian and Louis Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> Intersection of a vertical line 5mm medial to the lateral edge of the facet, and a horizontal line 3mm below the inferior edge of the underlying facet.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 0° (straight ahead). Note: Figure 2 in the source paper shows 10°.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 90° to the lateral mass surface (perpendicular).</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Magerl Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/3_LateralMass_Magerl.jpeg" alt="Magerl Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> 1 mm medial and 1 mm cranial to the midpoint of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 20° to 30° from the sagittal plane.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> Parallel to the adjacent facet joints.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Anderson Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/4_LateralMass_Anderson.jpeg" alt="Anderson Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> 1 mm medial to the center of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 10°.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 30° to 40° in a cephalad direction (parallel to facet joints).</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">An Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/5_LateralMass_An.jpeg" alt="An Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> 1 mm medial to the center of the lateral mass (for C3-C6).</li>
+                                                    <li><strong>Lateral Angulation:</strong> 30° laterally.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 15° of cephalad angulation.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Riew Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/6_LateralMass_Riew.jpeg" alt="Riew Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> 1 mm medial and 1 mm caudal to the center of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> Aim toward the upper and outer corner of the lateral mass.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> Aim toward the upper and outer corner of the lateral mass.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'c7-lateral-mass',
+                    name: 'C7 Lateral Mass Screw',
+                    imageUrl: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/7_C7_LateralMass_ModifiedRoyCamille.jpeg',
+                    indication: 'C7 is a transitional vertebra with a thin lateral mass, requiring a modified technique for safe fixation.',
+                    details: {
+                        title: 'C7 Lateral Mass Screw (Modified Roy-Camille)',
+                        mainImage: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/7_C7_LateralMass_ModifiedRoyCamille.jpeg',
+                        sections: [
+                            {
+                                title: '✅ Clinical Indication & Pearls',
+                                content: 'C7 is a transitional vertebra and its lateral mass is thinner than those from C3-C6. If C7 is the lowest instrumented vertebra, pedicle screw fixation should be considered, especially in osteoporotic patients. Standard techniques are often not ideal for C7. A modified Roy-Camille technique is proposed as a better option to avoid violating the T1 facet joint.'
+                            },
+                            {
+                                title: '🔬 Surgical Technique (Modified Roy-Camille)',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/7_C7_LateralMass_ModifiedRoyCamille.jpeg" alt="C7 Modified Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                        <ul class="list-disc list-inside flex-1">
+                                            <li><strong>Entry Point:</strong> Superomedial to the center of the lateral mass (similar to Magerl).</li>
+                                            <li><strong>Lateral Angulation:</strong> 15°.</li>
+                                            <li><strong>Sagittal Inclination:</strong> 90° with the surface of the lateral mass (perpendicular).</li>
+                                        </ul>
+                                    </div>
+                                `
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'subaxial-pedicle-screws',
+                    name: 'Subaxial Pedicle Screws',
+                    imageUrl: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/10_Transfacet_Takayasu.jpeg',
+                    indication: 'Provides strong biomechanical fixation but is technically demanding due to small pedicle size and neurovascular proximity.',
+                    details: {
+                        title: 'Subaxial Cervical Pedicle Screws (C3-C7)',
+                        mainImage: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/8_Pedicle_Abumi.jpeg',
+                        sections: [
+                            {
+                                title: '✅ Clinical Indication & Pearls',
+                                content: 'Provides greater pull-out strength than lateral mass screws. It is more commonly used for C2 and C7 vertebrae due to wider pedicle diameters. The technique is challenging due to the small pedicle size and proximity of the vertebral artery. Computer-assisted navigation can improve accuracy.'
+                            },
+                            {
+                                title: '🔬 Surgical Technique (Abumi et al)',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/8_Pedicle_Abumi.jpeg" alt="Abumi Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                        <ul class="list-disc list-inside flex-1">
+                                            <li><strong>Entry Point:</strong> Slightly lateral to the center of the lateral mass, near the inferior margin of the inferior facet joint of the vertebra above.</li>
+                                            <li><strong>Lateral Angulation:</strong> 25° to 45° medial to the midline.</li>
+                                            <li><strong>Sagittal Inclination:</strong> Parallel to the upper endplate for C5-C7; slightly cephalad for C2-C4.</li>
+                                        </ul>
+                                    </div>
+                                `
+                            }
+                        ]
+                    }
+                },
+                    {
+                    id: 'subaxial-intralaminar-screws',
+                    name: 'Subaxial Intralaminar Screws',
+                    imageUrl: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/9_Translaminar_C7Technique.jpeg',
+                    indication: 'A helpful bailout technique, especially at C7, when lateral mass or pedicle screw fixation is not possible.',
+                    details: {
+                        title: 'C7 Intralaminar Screws',
+                        mainImage: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/9_Translaminar_C7Technique.jpeg',
+                        sections: [
+                            {
+                                title: '✅ Clinical Indication & Pearls',
+                                content: 'This technique is a valuable "bailout" option when fixation is needed at C7 and other methods are not viable. The C7 lamina has a mean thickness of 5.67 ± 1 mm and length of 25.49 ± 2.73 mm. Biomechanically, C7 intralaminar screws have pullout strength comparable to C7 pedicle screws.'
+                            },
+                            {
+                                title: '🔬 Surgical Technique (Freehand)',
+                                content: `
+                                    <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                        <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/9_Translaminar_C7Technique.jpeg" alt="C7 Intralaminar Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                        <ol class="list-decimal list-inside space-y-2 flex-1">
+                                            <li>An initial hole is made ~4mm at the caudal aspect of the spinolaminar junction. A second hole is made on the rostral aspect of the junction on the contralateral side.</li>
+                                            <li>A hand drill is aimed toward the opposite lamina, with violation checked by a ball-tip probe.</li>
+                                            <li>Screws of approximately 3.5 x 24 mm are then inserted.</li>
+                                        </ol>
+                                    </div>
+                                `
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 'subaxial-transfacet-screws',
+                    name: 'Subaxial Transfacet Screws',
+                    imageUrl: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/8_Pedicle_Abumi.jpeg',
+                    indication: 'Offers mechanical stability similar to lateral mass screws; can be a primary or bailout fixation method.',
+                    hasVariants: true,
+                    details: {
+                        title: 'Subaxial Transfacet Screws',
+                        mainImage: 'https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/10_Transfacet_Takayasu.jpeg',
+                        sections: [
+                            {
+                                title: '✅ Clinical Indication & Pearls',
+                                content: 'Transfacet screws have shown similar mechanical stability and superior pull-out strength compared to lateral mass screws. They can be used as a primary fixation technique or as a valuable bailout when other options are not possible.'
+                            },
+                            {
+                                title: '📊 Comparison of Variants',
+                                content: `
+                                    <div class="space-y-8">
+                                        <div>
+                                            <h4 class="font-bold text-lg">Takayasu Technique</h4>
+                                            <div class="flex flex-col md:flex-row gap-4 mt-2">
+                                                <img src="https://raw.githubusercontent.com/Jorgetabilo/Cervical/main/10_Transfacet_Takayasu.jpeg" alt="Takayasu Technique" class="w-full md:w-1/3 rounded-lg object-cover cursor-pointer zoomable-image">
+                                                <ul class="list-disc list-inside flex-1">
+                                                    <li><strong>Entry Point:</strong> On the vertical line bisecting the lateral mass, at the midway caudal third of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 0° (straight).</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 60° to 80° caudally.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">DalCanto Technique</h4>
+                                                <ul class="list-disc list-inside flex-1 mt-2">
+                                                    <li><strong>Entry Point:</strong> 2 mm caudal to the midpoint of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 20° laterally.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 40° caudally.</li>
+                                                </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Klekamp Technique</h4>
+                                                <ul class="list-disc list-inside flex-1 mt-2">
+                                                    <li><strong>Entry Point:</strong> 1 mm medial and 1 to 2 mm caudal to the midpoint of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 20° laterally.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> 40° caudally.</li>
+                                                </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Miyanji Technique</h4>
+                                                <ul class="list-disc list-inside flex-1 mt-2">
+                                                    <li><strong>Entry Point:</strong> Midpoint of the lateral mass.</li>
+                                                    <li><strong>Lateral Angulation:</strong> 0° to 5° laterally.</li>
+                                                    <li><strong>Sagittal Inclination:</strong> Perpendicular to the joint in the cephalocaudal direction.</li>
+                                                </ul>
+                                        </div>
+                                    </div>
+                                `
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        // --- ELEMENTOS DEL DOM ---
+        const splashScreen = document.getElementById('splash-screen');
+        const selectorScreen = document.getElementById('technique-selector-screen');
+        const detailScreen = document.getElementById('technique-detail-screen');
+        const startBtn = document.getElementById('start-btn');
+        const backBtn = document.getElementById('back-to-techniques-btn');
+        const techniqueGrid = document.getElementById('technique-grid');
+        const detailContent = document.getElementById('technique-detail-content');
+        const themeToggle = document.getElementById('theme-toggle');
+        const imageZoomModal = document.getElementById('image-zoom-modal');
+        const zoomedImage = document.getElementById('zoomed-image');
+        const closeZoomBtn = document.getElementById('close-zoom-btn');
+
+        // --- NAVEGACIÓN ---
+        function showScreen(screenToShow) {
+            [splashScreen, selectorScreen, detailScreen].forEach(screen => {
+                if (screen === screenToShow) {
+                    screen.classList.remove('hidden-screen');
+                    screen.classList.add('visible-screen');
+                } else {
+                    screen.classList.add('hidden-screen');
+                    screen.classList.remove('visible-screen');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        startBtn.addEventListener('click', () => showScreen(selectorScreen));
+        backBtn.addEventListener('click', () => showScreen(selectorScreen));
+
+        // --- RENDERIZADO DINÁMICO ---
+        function renderTechniqueCards() {
+            techniqueGrid.innerHTML = '';
+            db.techniques.forEach(tech => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover-effect cursor-pointer flex flex-col';
+                const buttonText = tech.details.sections.some(s => s.title.includes('Comparison')) || tech.hasVariants ? 'Explore Techniques' : 'Explore Technique';
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${tech.imageUrl}" alt="Image of ${tech.name}" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-xl font-bold mb-2">${tech.name}</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm flex-grow">${tech.indication}</p>
+                        <button class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg btn-animated">
+                            ${buttonText}
+                        </button>
+                    </div>
+                `;
+                card.addEventListener('click', () => renderTechniqueDetail(tech.id));
+                techniqueGrid.appendChild(card);
+            });
+        }
+
+        function renderTechniqueDetail(techniqueId) {
+            const tech = db.techniques.find(t => t.id === techniqueId);
+            if (!tech) return;
+
+            let sectionsContainerHtml = '';
+            const useAccordion = tech.hasVariants === true || tech.id === 'c1-lateral-mass';
+
+
+            if (useAccordion) {
+                let accordionHtml = '';
+                let variantsHtml = '';
+                tech.details.sections.forEach(section => {
+                     if (section.title.includes('Comparison')) {
+                        variantsHtml = `
+                            <div class="p-4">
+                                <h3 class="text-2xl font-bold mb-6">${section.title}</h3>
+                                ${section.content}
+                            </div>
+                        `;
+                    } else {
+                        accordionHtml += `
+                            <div class="border-b border-gray-200 dark:border-gray-700">
+                                <button class="w-full flex justify-between items-center p-4 text-left font-semibold text-lg focus:outline-none accordion-toggle">
+                                    <span>${section.title}</span>
+                                    <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300">
+                                        ${section.content}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                sectionsContainerHtml = `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                        ${accordionHtml}
+                    </div>
+                    ${variantsHtml ? `<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mt-8">${variantsHtml}</div>` : ''}
+                `;
+            } else {
+                let staticSectionsHtml = '';
+                tech.details.sections.forEach(section => {
+                    staticSectionsHtml += `
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                            <h3 class="text-2xl font-bold mb-4">${section.title}</h3>
+                            <div class="text-gray-600 dark:text-gray-300">
+                                ${section.content}
+                            </div>
+                        </div>
+                    `;
+                });
+                sectionsContainerHtml = `<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">${staticSectionsHtml}</div>`;
+            }
+
+            detailContent.innerHTML = `
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">${tech.details.title}</h2>
+                <div class="relative group">
+                    <img src="${tech.details.mainImage}" alt="Main image for ${tech.details.title}" class="w-full rounded-xl shadow-lg mb-8 cursor-pointer zoomable-image">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none">
+                        <p class="text-white text-lg font-semibold">Click to zoom</p>
+                    </div>
+                </div>
+                ${sectionsContainerHtml}
+                <div class="mt-6 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded-r-lg dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-400">
+                    <div class="flex items-center">
+                        <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                        <p class="font-semibold">Future Feature: 3D integration with Navigation/O-Arm pending.</p>
+                    </div>
+                </div>
+            `;
+            
+            setupAccordion();
+            setupImageZoom();
+            showScreen(detailScreen);
+        }
+
+        function setupAccordion() {
+            const toggles = detailContent.querySelectorAll('.accordion-toggle');
+            toggles.forEach((toggle, index) => {
+                const content = toggle.nextElementSibling;
+                // Abre el primer acordeón por defecto
+                if (index === 0 && content) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    toggle.querySelector('svg').style.transform = 'rotate(180deg)';
+                }
+
+                toggle.addEventListener('click', () => {
+                    const content = toggle.nextElementSibling;
+                    if (!content) return;
+                    
+                    const isCurrentlyOpen = content.style.maxHeight !== '0px';
+                    
+                    // Cierra todos los demás acordeones
+                    toggles.forEach(otherToggle => {
+                        const otherContent = otherToggle.nextElementSibling;
+                        if (otherContent) {
+                            otherContent.style.maxHeight = '0px';
+                            otherToggle.querySelector('svg').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // Si no estaba abierto, ábrelo
+                    if (!isCurrentlyOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        toggle.querySelector('svg').style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        }
+        
+        function setupImageZoom() {
+            document.querySelectorAll('.zoomable-image').forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    zoomedImage.src = img.src;
+                    imageZoomModal.classList.remove('hidden');
+                });
+            });
+        }
+
+        closeZoomBtn.addEventListener('click', () => imageZoomModal.classList.add('hidden'));
+        imageZoomModal.addEventListener('click', () => imageZoomModal.classList.add('hidden'));
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        renderTechniqueCards();
+        showScreen(splashScreen);
+    });
+    </script>
+</body>
+</html>
